@@ -1,7 +1,7 @@
 import { Trade, Metrics, EquityPoint, TradeStatus, UserProfile } from '../types';
 
 export const calculateMetrics = (trades: Trade[], initialBalance: number = 100000): Metrics => {
-  const closedTrades = trades.filter(t => t.status === TradeStatus.CLOSED).sort((a, b) => (a.exitDate || 0) - (b.exitDate || 0));
+  const closedTrades = trades.filter(t => t.status === TradeStatus.CLOSED).sort((a, b) => (Number(a.exitDate) || 0) - (Number(b.exitDate) || 0));
 
   let wins = 0;
   let grossProfit = 0;
@@ -80,7 +80,7 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
 export const generateEquityCurve = (trades: Trade[], initialBalance: number): EquityPoint[] => {
   const sortedTrades = trades
     .filter(t => t.status === TradeStatus.CLOSED)
-    .sort((a, b) => (a.exitDate || 0) - (b.exitDate || 0));
+    .sort((a, b) => (Number(a.exitDate) || 0) - (Number(b.exitDate) || 0));
 
   let currentBalance = Number(initialBalance);
   let maxBalance = Number(initialBalance);
