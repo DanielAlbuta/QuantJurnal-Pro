@@ -144,10 +144,10 @@ const TradeEntryModal: React.FC<TradeEntryModalProps> = ({ isOpen, onClose, onSa
 
     // Auto-calculate basic financials if missing
     // Logic: Net PnL is the anchor. Gross is derived for record keeping if not explicitly tracked in separate field in this form state (derived).
-    const gross = (formData.netPnL || 0) + (formData.commission || 0) + (formData.swap || 0);
+    const gross = (Number(formData.netPnL) || 0) + (Number(formData.commission) || 0) + (Number(formData.swap) || 0);
 
     // Calculate R if not set manually
-    let rMult = formData.riskMultiple || 0;
+    let rMult = Number(formData.riskMultiple) || 0;
     if (rMult === 0 && formData.riskAmount && formData.riskAmount > 0) {
       const net = formData.netPnL || 0;
       const risk = formData.riskAmount;
