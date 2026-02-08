@@ -6,8 +6,8 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
   let wins = 0;
   let grossProfit = 0;
   let grossLoss = 0;
-  let maxEquity = initialBalance;
-  let currentEquity = initialBalance;
+  let maxEquity = Number(initialBalance);
+  let currentEquity = Number(initialBalance);
   let maxDD = 0;
   let maxDDPercent = 0;
   let largestWin = 0;
@@ -17,7 +17,7 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
   let currentStreak = 0;
 
   closedTrades.forEach(trade => {
-    const pnl = trade.netPnL;
+    const pnl = Number(trade.netPnL);
     currentEquity += pnl;
 
     // DD Calculation
@@ -26,7 +26,7 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
     }
     const dd = maxEquity - currentEquity;
     const ddPercent = (dd / maxEquity) * 100;
-    
+
     if (dd > maxDD) maxDD = dd;
     if (ddPercent > maxDDPercent) maxDDPercent = ddPercent;
 
@@ -35,14 +35,14 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
       wins++;
       grossProfit += pnl;
       if (pnl > largestWin) largestWin = pnl;
-      
+
       if (currentStreak >= 0) currentStreak++;
       else currentStreak = 1;
 
     } else {
       grossLoss += Math.abs(pnl);
       if (pnl < largestLoss) largestLoss = pnl; // largestLoss is negative usually, store actual value
-      
+
       if (currentStreak <= 0) currentStreak--;
       else currentStreak = -1;
     }
@@ -55,7 +55,7 @@ export const calculateMetrics = (trades: Trade[], initialBalance: number = 10000
   const averageWin = wins > 0 ? grossProfit / wins : 0;
   const averageLoss = losses > 0 ? grossLoss / losses : 0; // Absolute value
   const netProfit = currentEquity - initialBalance;
-  
+
   // Expectancy = (Win% * AvgWin) - (Loss% * AvgLoss)
   const winPct = wins / totalTrades;
   const lossPct = losses / totalTrades;
@@ -82,22 +82,22 @@ export const generateEquityCurve = (trades: Trade[], initialBalance: number): Eq
     .filter(t => t.status === TradeStatus.CLOSED)
     .sort((a, b) => (a.exitDate || 0) - (b.exitDate || 0));
 
-  let currentBalance = initialBalance;
-  let maxBalance = initialBalance;
-  
+  let currentBalance = Number(initialBalance);
+  let maxBalance = Number(initialBalance);
+
   const curve: EquityPoint[] = [
     {
       date: 'Start',
       timestamp: sortedTrades.length > 0 ? sortedTrades[0].entryDate - 86400000 : Date.now(),
-      equity: initialBalance,
+      equity: Number(initialBalance),
       drawdown: 0
     }
   ];
 
   sortedTrades.forEach(trade => {
-    currentBalance += trade.netPnL;
+    currentBalance += Number(trade.netPnL);
     if (currentBalance > maxBalance) maxBalance = currentBalance;
-    
+
     const ddPercent = maxBalance > 0 ? ((maxBalance - currentBalance) / maxBalance) * 100 : 0;
 
     curve.push({
@@ -121,7 +121,7 @@ export const formatNumber = (val: number, decimals = 2) => {
 
 export const getTradeViolations = (trade: Trade, allTrades: Trade[], profile?: UserProfile): string[] => {
   const violations: string[] = [];
-  
+
   // Dynamic Limits from Profile or Fallback
   const MAX_RISK_AMOUNT = profile ? (profile.startBalance * profile.maxRiskPerTrade / 100) : 2000;
   const MAX_LOSS_MULTIPLIER = 1.5; // If loss is > 1.5x planned risk
@@ -136,7 +136,7 @@ export const getTradeViolations = (trade: Trade, allTrades: Trade[], profile?: U
 
   // 2. Trading outside session (Simple heuristic based on UTC hours)
   const entryHour = new Date(trade.entryDate).getUTCHours();
-  
+
   // Approximate UTC windows for sessions
   const SESSIONS = {
     'LONDON': { start: 7, end: 17 },
@@ -165,9 +165,9 @@ export const getTradeViolations = (trade: Trade, allTrades: Trade[], profile?: U
   // Find closest previous trade by exit time
   const REVENGE_WINDOW_MS = 30 * 60 * 1000; // 30 mins
 
-  const previousTrades = allTrades.filter(t => 
-    t.id !== trade.id && 
-    t.exitDate && 
+  const previousTrades = allTrades.filter(t =>
+    t.id !== trade.id &&
+    t.exitDate &&
     t.exitDate <= trade.entryDate
   ).sort((a, b) => (b.exitDate || 0) - (a.exitDate || 0));
 
