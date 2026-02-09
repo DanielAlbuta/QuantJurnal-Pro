@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, List, BarChart3, Settings as SettingsIcon, LogOut, BookOpen, PlusCircle, RotateCcw } from 'lucide-react';
+import { LayoutDashboard, List, BarChart3, Settings as SettingsIcon, LogOut, BookOpen, PlusCircle, RotateCcw, X } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import TradeList from './components/TradeList';
 import Analytics from './components/Analytics';
@@ -41,6 +41,7 @@ const App: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Modal states
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
@@ -307,8 +308,8 @@ const App: React.FC = () => {
     <button
       onClick={() => setCurrentView(view)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${currentView === view
-          ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-600/20'
-          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+        ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-600/20'
+        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
         }`}
     >
       {icon}
@@ -408,10 +409,55 @@ const App: React.FC = () => {
             </div>
             <span className="font-bold text-white">QJ</span>
           </div>
-          <button className="p-2 text-slate-400">
-            <List className="w-6 h-6" />
+          <button
+            className="p-2 text-slate-400 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <List className="w-6 h-6" />}
           </button>
         </header>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute inset-0 z-50 bg-slate-900/95 backdrop-blur-sm animate-in slide-in-from-top-10 duration-200 flex flex-col">
+            <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-white">QuantJournal</span>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-slate-400 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+              <NavItem view="dashboard" icon={<LayoutDashboard className="w-5 h-5" />} label="Overview" />
+              <NavItem view="journal" icon={<List className="w-5 h-5" />} label="Trade Journal" />
+              <NavItem view="analytics" icon={<BarChart3 className="w-5 h-5" />} label="Analytics" />
+
+              <div className="pt-6 pb-2 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Tools
+              </div>
+              <NavItem view="profile" icon={<UserIcon className="w-5 h-5" />} label="Profile" />
+              <NavItem view="settings" icon={<SettingsIcon className="w-5 h-5" />} label="Settings" />
+            </nav>
+
+            <div className="p-4 border-t border-slate-800">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-rose-900/10 hover:text-rose-400 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">Log Out</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Content Area */}
         <div className="flex-1 overflow-auto p-4 md:p-8 relative">
